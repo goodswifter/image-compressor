@@ -18,7 +18,7 @@ export async function compressImage(
   options: CompressionOptions,
 ): Promise<CompressionResult> {
   // 小文件检查：小于50KB直接返回
-  const SMALL_FILE_THRESHOLD = 50 * 1024 // 50KB
+  const SMALL_FILE_THRESHOLD = 50 * 1000 // 50KB (十进制)
   if (file.size < SMALL_FILE_THRESHOLD) {
     console.info(`文件大小 ${formatFileSize(file.size)} 小于 50KB，跳过压缩`)
     return {
@@ -122,6 +122,7 @@ function calculateCompressionRatio(originalSize: number, compressedSize: number)
 
 /**
  * 格式化文件大小
+ * 使用十进制单位（1000）与操作系统显示保持一致
  *
  * @param bytes 字节数
  * @returns 格式化后的大小字符串
@@ -129,8 +130,26 @@ function calculateCompressionRatio(originalSize: number, compressedSize: number)
 export function formatFileSize(bytes: number): string {
   if (bytes === 0) return '0 B'
 
-  const k = 1024
+  // 使用十进制单位（1000）与操作系统文件管理器保持一致
+  const k = 1000
   const sizes = ['B', 'KB', 'MB', 'GB']
+  const i = Math.floor(Math.log(bytes) / Math.log(k))
+
+  return `${Number.parseFloat((bytes / k ** i).toFixed(2))} ${sizes[i]}`
+}
+
+/**
+ * 格式化文件大小（二进制单位）
+ * 使用二进制单位（1024）用于技术精确显示
+ *
+ * @param bytes 字节数
+ * @returns 格式化后的大小字符串
+ */
+export function formatFileSizeBinary(bytes: number): string {
+  if (bytes === 0) return '0 B'
+
+  const k = 1024
+  const sizes = ['B', 'KiB', 'MiB', 'GiB']
   const i = Math.floor(Math.log(bytes) / Math.log(k))
 
   return `${Number.parseFloat((bytes / k ** i).toFixed(2))} ${sizes[i]}`
