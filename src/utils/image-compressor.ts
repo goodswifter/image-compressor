@@ -152,7 +152,7 @@ export function formatFileSize(bytes: number): string {
 
 /**
  * 格式化总大小统计
- * 专门用于总大小显示，保留2位小数精度
+ * 专门用于总大小显示，保留1位小数精度
  *
  * @param bytes 字节数
  * @returns 格式化后的大小字符串
@@ -165,11 +165,11 @@ export function formatTotalSize(bytes: number): string {
   const i = Math.floor(Math.log(bytes) / Math.log(k))
   const value = bytes / k ** i
 
-  // 总大小统一保留2位小数
+  // 总大小保留1位小数（B级别保留整数）
   if (i === 0) {
     return `${Math.round(value)} ${sizes[i]}` // B级别保留整数
   }
-  return `${value.toFixed(2)} ${sizes[i]}`
+  return `${value.toFixed(1)} ${sizes[i]}`
 }
 
 /**
