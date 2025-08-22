@@ -1,0 +1,39 @@
+{
+  "compilerOptions": {
+    "target": "es2015", // 指定编译目标版本
+    "jsx": "preserve",
+    "lib": ["ES2021", "DOM", "DOM.Iterable"],
+    "moduleDetection": "force",
+    "useDefineForClassFields": true,
+
+    /* path */
+    "baseUrl": ".",
+    "module": "ESNext",
+
+    /* Bundler mode */
+    "moduleResolution": "Bundler",
+    "paths": {
+      // 用于设置模块名到基于baseUrl的路径映射
+      "@/*": ["src/*"],
+      "@build/*": ["build/*"]
+    },
+    "typeRoots": [
+      "node_modules/@types", // 或者指定 Vue 类型根目录
+      "typings" // 如果有自定义类型，确保包括此路径
+    ],
+    "allowImportingTsExtensions": true,
+    /* Linting */
+    "strict": true,
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitAny": false, // 允许隐式 any 类型
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noEmit": true,
+    // "types": ["vite/client"], // 指定模块类型，但同时隐藏了默认node_modules/@types下的类型，可以更精细化处理类型提升编译速度
+    "allowSyntheticDefaultImports": true, // 允许合成默认导入
+    "isolatedModules": true,
+    "skipLibCheck": true
+  },
+  "include": ["src/**/*.ts", "src/**/*.vue", "src/**/*.scss", "typings/**/*.d.ts", "build/**/*.ts"],
+  "exclude": ["dist", "**/*.js", "node_modules"]
+}

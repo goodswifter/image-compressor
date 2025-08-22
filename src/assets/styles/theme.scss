@@ -1,0 +1,10 @@
+// 也可以通过 CSS 变量覆盖（作为备用方案）
+:root {
+  --el-color-primary: #f60f0f !important;
+  --el-color-primary-light-3: #f84040 !important;
+  --el-color-primary-light-5: #fa6d6d !important;
+  --el-color-primary-light-7: #fc9a9a !important;
+  --el-color-primary-light-8: #fdb6b6 !important;
+  --el-color-primary-light-9: #fed2d2 !important;
+  --el-color-primary-dark-2: #dd0d0d !important;
+}
