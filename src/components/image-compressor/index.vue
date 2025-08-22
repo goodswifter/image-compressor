@@ -145,7 +145,7 @@
           <div class="stat-item">
             <div class="stat-label">原始总大小</div>
             <div class="stat-value original">
-              {{ formatFileSize(totalSizeStats.totalOriginalSize) }}
+              {{ formatTotalSize(totalSizeStats.totalOriginalSize) }}
             </div>
           </div>
 
@@ -156,7 +156,7 @@
           <div class="stat-item">
             <div class="stat-label">压缩后大小</div>
             <div class="stat-value compressed">
-              {{ formatFileSize(totalSizeStats.totalCompressedSize) }}
+              {{ formatTotalSize(totalSizeStats.totalCompressedSize) }}
             </div>
           </div>
 
@@ -173,7 +173,7 @@
           <div class="stat-item">
             <div class="stat-label">节省空间</div>
             <div class="stat-value saved">
-              {{ formatFileSize(Math.max(0, totalSizeStats.savedSpace)) }}
+              {{ formatTotalSize(Math.max(0, totalSizeStats.savedSpace)) }}
             </div>
           </div>
 
@@ -325,6 +325,7 @@ import {
   downloadFile,
   downloadMultipleFiles,
   formatFileSize,
+  formatTotalSize,
   generateId,
   getFileExtension,
   isImageFile,

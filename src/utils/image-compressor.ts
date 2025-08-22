@@ -122,7 +122,8 @@ function calculateCompressionRatio(originalSize: number, compressedSize: number)
 
 /**
  * 格式化文件大小
- * 使用十进制单位（1000）与操作系统显示保持一致，四舍五入保留整数
+ * 使用十进制单位（1000）与操作系统显示保持一致
+ * KB及以下保留整数，MB保留1位小数，GB保留2位小数
  *
  * @param bytes 字节数
  * @returns 格式化后的大小字符串
@@ -134,15 +135,46 @@ export function formatFileSize(bytes: number): string {
   const k = 1000
   const sizes = ['B', 'KB', 'MB', 'GB']
   const i = Math.floor(Math.log(bytes) / Math.log(k))
+  const value = bytes / k ** i
 
-  // 四舍五入保留整数
-  const value = Math.round(bytes / k ** i)
-  return `${value} ${sizes[i]}`
+  // 根据单位采用不同精度
+  switch (i) {
+    case 0: // B
+    case 1: // KB
+      return `${Math.round(value)} ${sizes[i]}`
+    case 2: // MB
+      return `${value.toFixed(1)} ${sizes[i]}`
+    case 3: // GB
+    default:
+      return `${value.toFixed(2)} ${sizes[i]}`
+  }
+}
+
+/**
+ * 格式化总大小统计
+ * 专门用于总大小显示，保留2位小数精度
+ *
+ * @param bytes 字节数
+ * @returns 格式化后的大小字符串
+ */
+export function formatTotalSize(bytes: number): string {
+  if (bytes === 0) return '0 B'
+
+  const k = 1000
+  const sizes = ['B', 'KB', 'MB', 'GB']
+  const i = Math.floor(Math.log(bytes) / Math.log(k))
+  const value = bytes / k ** i
+
+  // 总大小统一保留2位小数
+  if (i === 0) {
+    return `${Math.round(value)} ${sizes[i]}` // B级别保留整数
+  }
+  return `${value.toFixed(2)} ${sizes[i]}`
 }
 
 /**
  * 格式化文件大小（二进制单位）
- * 使用二进制单位（1024）用于技术精确显示，四舍五入保留整数
+ * 使用二进制单位（1024）用于技术精确显示
  *
  * @param bytes 字节数
  * @returns 格式化后的大小字符串
@@ -153,10 +185,19 @@ export function formatFileSizeBinary(bytes: number): string {
   const k = 1024
   const sizes = ['B', 'KiB', 'MiB', 'GiB']
   const i = Math.floor(Math.log(bytes) / Math.log(k))
+  const value = bytes / k ** i
 
-  // 四舍五入保留整数
-  const value = Math.round(bytes / k ** i)
-  return `${value} ${sizes[i]}`
+  // 根据单位采用不同精度
+  switch (i) {
+    case 0: // B
+    case 1: // KiB
+      return `${Math.round(value)} ${sizes[i]}`
+    case 2: // MiB
+      return `${value.toFixed(1)} ${sizes[i]}`
+    case 3: // GiB
+    default:
+      return `${value.toFixed(2)} ${sizes[i]}`
+  }
 }
 
 /**
