@@ -20,6 +20,17 @@ export async function compressImage(
   file: File,
   options: CompressionOptions,
 ): Promise<CompressionResult> {
+  // 统一的小文件检查：小于50KB直接返回
+  const SMALL_FILE_THRESHOLD = 50 * 1024 // 50KB
+  if (file.size < SMALL_FILE_THRESHOLD) {
+    console.info(`文件大小 ${formatFileSize(file.size)} 小于 50KB，跳过压缩`)
+    return {
+      blob: file,
+      compressionRatio: 0,
+      size: file.size,
+    }
+  }
+
   try {
     // 尝试使用服务端Sharp压缩
     return await compressImageWithSharp(file, options)
