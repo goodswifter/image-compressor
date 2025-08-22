@@ -81,7 +81,6 @@ const wrapperEnv = (envConf: Recordable): ViteEnv => {
     VITE_PUBLIC_PATH: '',
     VITE_ROUTER_HISTORY: '',
     VITE_COMPRESSION: 'none',
-    VITE_BASE_URL: 'http://localhost:3001',
   }
 
   for (const envName of Object.keys(envConf)) {

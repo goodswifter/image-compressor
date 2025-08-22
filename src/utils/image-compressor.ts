@@ -1,16 +1,13 @@
 /**
- * 图片压缩工具函数
+ * 图片压缩工具函数 - 使用 browser-image-compression
  */
 
 import type { CompressionOptions, CompressionResult } from '@/types/compressor'
-import axios from 'axios'
+import imageCompression from 'browser-image-compression'
 import JSZip from 'jszip'
 
-// API配置
-const API_BASE_URL = import.meta.env.VITE_BASE_URL || 'http://localhost:3001'
-
 /**
- * 压缩图片（优先使用服务端Sharp，失败时降级到Canvas）
+ * 压缩图片（使用 browser-image-compression）
  *
  * @param file 原始文件
  * @param options 压缩选项
@@ -20,7 +17,7 @@ export async function compressImage(
   file: File,
   options: CompressionOptions,
 ): Promise<CompressionResult> {
-  // 统一的小文件检查：小于50KB直接返回
+  // 小文件检查：小于50KB直接返回
   const SMALL_FILE_THRESHOLD = 50 * 1024 // 50KB
   if (file.size < SMALL_FILE_THRESHOLD) {
     console.info(`文件大小 ${formatFileSize(file.size)} 小于 50KB，跳过压缩`)
@@ -32,224 +29,91 @@ export async function compressImage(
   }
 
   try {
-    // 尝试使用服务端Sharp压缩
-    return await compressImageWithSharp(file, options)
-  } catch (error) {
-    console.warn('服务端压缩失败，降级到客户端Canvas压缩:', error)
-    // 降级到Canvas压缩
-    const result = await compressImageWithCanvas(file, options)
-    return result
-  }
-}
+    // 配置 browser-image-compression 选项
+    const compressionOptions = {
+      maxSizeMB: 10, // 最大文件大小 10MB
+      maxWidthOrHeight: Math.max(options.maxWidth || 1920, options.maxHeight || 1080),
+      useWebWorker: true, // 使用 Web Worker 提升性能
+      fileType: getImageMimeType(options.format),
+      initialQuality: options.quality,
+    }
 
-/**
- * 使用服务端Sharp压缩图片
- *
- * @param file 原始文件
- * @param options 压缩选项
- * @returns 压缩结果
- */
-async function compressImageWithSharp(
-  file: File,
-  options: CompressionOptions,
-): Promise<CompressionResult> {
-  const formData = new FormData()
-  formData.append('image', file)
-  formData.append('format', options.format)
-  formData.append('quality', Math.round(options.quality * 100).toString())
+    // 如果指定了具体的宽高限制
+    if (options.maxWidth || options.maxHeight) {
+      if (options.maxWidth && options.maxHeight) {
+        // 取较小值作为限制
+        compressionOptions.maxWidthOrHeight = Math.min(options.maxWidth, options.maxHeight)
+      } else {
+        compressionOptions.maxWidthOrHeight = options.maxWidth || options.maxHeight || 1920
+      }
+    }
 
-  if (options.maxWidth) {
-    formData.append('maxWidth', options.maxWidth.toString())
-  }
-
-  if (options.maxHeight) {
-    formData.append('maxHeight', options.maxHeight.toString())
-  }
-  formData.append('maintainAspectRatio', options.maintainAspectRatio.toString())
-
-  try {
-    const response = await axios.post(`${API_BASE_URL}/api/compress`, formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-      timeout: 30000, // 30秒超时
+    console.info('开始压缩图片...', {
+      originalSize: formatFileSize(file.size),
+      options: compressionOptions,
     })
 
-    if (!response.data.success) {
-      throw new Error(response.data.error || '服务端压缩失败')
+    // 执行压缩
+    const compressedFile = await imageCompression(file, compressionOptions)
+
+    // 计算压缩比
+    const originalSize = file.size
+    const compressedSize = compressedFile.size
+    const compressionRatio = calculateCompressionRatio(originalSize, compressedSize)
+
+    // 智能判断：如果压缩后没有明显减小，返回原图
+    if (compressedSize >= originalSize * 0.95) {
+      console.info('压缩效果不明显，保持原图')
+      return {
+        blob: file,
+        compressionRatio: 0,
+        size: originalSize,
+      }
     }
 
-    const {
-      compressedImage,
-      compressedSize,
-      compressionRatio,
-      message,
-      skipped,
-      fallbackToOriginal,
-    } = response.data.data
-
-    // 如果后端智能跳过了压缩，显示提示信息
-    if (skipped || fallbackToOriginal) {
-      console.info('智能压缩策略:', message)
-    }
-
-    // 将base64转换为Blob
-    const byteCharacters = atob(compressedImage)
-    const byteNumbers = Array.from({ length: byteCharacters.length })
-    for (let i = 0; i < byteCharacters.length; i++) {
-      byteNumbers[i] = byteCharacters.charCodeAt(i)
-    }
-    const byteArray = new Uint8Array(byteNumbers as ArrayLike<number>)
-    const blob = new Blob([byteArray], { type: `image/${options.format}` })
+    console.info('压缩完成', {
+      originalSize: formatFileSize(originalSize),
+      compressedSize: formatFileSize(compressedSize),
+      compressionRatio: `${compressionRatio}%`,
+    })
 
     return {
-      blob,
+      blob: compressedFile,
       compressionRatio,
       size: compressedSize,
     }
   } catch (error) {
-    if (axios.isAxiosError(error)) {
-      if (error.code === 'ECONNREFUSED') {
-        throw new Error('无法连接到压缩服务器，请确保服务器已启动')
-      }
-
-      if (error.response?.status === 400) {
-        throw new Error(error.response.data?.error || '请求参数错误')
-      }
-
-      if (error.response?.status && error.response.status >= 500) {
-        throw new Error('服务器内部错误')
-      }
-    }
-    throw error
+    console.error('图片压缩失败:', error)
+    throw new Error(`图片压缩失败: ${error instanceof Error ? error.message : '未知错误'}`)
   }
 }
 
 /**
- * 使用客户端Canvas压缩图片（后备方案）
+ * 获取图片 MIME 类型
  *
- * @param file 原始文件
- * @param options 压缩选项
- * @returns 压缩结果
+ * @param format 图片格式
+ * @returns MIME 类型
  */
-function compressImageWithCanvas(
-  file: File,
-  options: CompressionOptions,
-): Promise<CompressionResult> {
-  return new Promise((resolve, reject) => {
-    const img = new Image()
-    img.addEventListener('load', () => {
-      try {
-        const canvas = document.createElement('canvas')
-        const ctx = canvas.getContext('2d')
-
-        if (!ctx) {
-          reject(new Error('无法获取Canvas上下文'))
-          return
-        }
-
-        // 计算新的尺寸
-        const { width, height } = calculateNewDimensions(
-          img.width,
-          img.height,
-          options.maxWidth,
-          options.maxHeight,
-          options.maintainAspectRatio,
-        )
-
-        canvas.width = width
-        canvas.height = height
-
-        // 绘制图片
-        ctx.drawImage(img, 0, 0, width, height)
-
-        // 转换为指定格式
-        canvas.toBlob(
-          blob => {
-            if (!blob) {
-              reject(new Error('图片压缩失败'))
-              return
-            }
-
-            const compressionRatio = calculateCompressionRatio(file.size, blob.size)
-
-            resolve({
-              blob,
-              compressionRatio,
-              size: blob.size,
-            })
-          },
-          `image/${options.format}`,
-          options.quality,
-        )
-      } catch (error) {
-        reject(error)
-      }
-    })
-
-    img.addEventListener('error', () => {
-      reject(new Error('图片加载失败'))
-    })
-
-    img.src = URL.createObjectURL(file)
-  })
-}
-
-/**
- * 计算新的图片尺寸
- *
- * @param originalWidth
- * @param originalHeight
- * @param maxWidth
- * @param maxHeight
- * @param maintainAspectRatio
- */
-function calculateNewDimensions(
-  originalWidth: number,
-  originalHeight: number,
-  maxWidth?: number,
-  maxHeight?: number,
-  maintainAspectRatio = true,
-): { width: number; height: number } {
-  let { width, height } = { width: originalWidth, height: originalHeight }
-
-  if (!maxWidth && !maxHeight) {
-    return { width, height }
+function getImageMimeType(format: string): string {
+  switch (format.toLowerCase()) {
+    case 'webp':
+      return 'image/webp'
+    case 'jpeg':
+    case 'jpg':
+      return 'image/jpeg'
+    case 'png':
+      return 'image/png'
+    default:
+      return 'image/jpeg' // 默认使用 JPEG
   }
-
-  if (maintainAspectRatio) {
-    const aspectRatio = originalWidth / originalHeight
-
-    if (maxWidth && maxHeight) {
-      if (width > maxWidth || height > maxHeight) {
-        if (width / maxWidth > height / maxHeight) {
-          width = maxWidth
-          height = width / aspectRatio
-        } else {
-          height = maxHeight
-          width = height * aspectRatio
-        }
-      }
-    } else if (maxWidth && width > maxWidth) {
-      width = maxWidth
-      height = width / aspectRatio
-    } else if (maxHeight && height > maxHeight) {
-      height = maxHeight
-      width = height * aspectRatio
-    }
-  } else {
-    if (maxWidth) width = Math.min(width, maxWidth)
-    if (maxHeight) height = Math.min(height, maxHeight)
-  }
-
-  return { width: Math.round(width), height: Math.round(height) }
 }
 
 /**
  * 计算压缩比例
  *
- * @param originalSize
- * @param compressedSize
+ * @param originalSize 原始大小
+ * @param compressedSize 压缩后大小
+ * @returns 压缩比例（百分比）
  */
 function calculateCompressionRatio(originalSize: number, compressedSize: number): number {
   if (originalSize === 0) return 0
@@ -259,7 +123,8 @@ function calculateCompressionRatio(originalSize: number, compressedSize: number)
 /**
  * 格式化文件大小
  *
- * @param bytes
+ * @param bytes 字节数
+ * @returns 格式化后的大小字符串
  */
 export function formatFileSize(bytes: number): string {
   if (bytes === 0) return '0 B'
@@ -274,7 +139,8 @@ export function formatFileSize(bytes: number): string {
 /**
  * 验证文件是否为图片
  *
- * @param file
+ * @param file 文件对象
+ * @returns 是否为图片
  */
 export function isImageFile(file: File): boolean {
   return file.type.startsWith('image/')
@@ -283,7 +149,8 @@ export function isImageFile(file: File): boolean {
 /**
  * 获取文件扩展名
  *
- * @param filename
+ * @param filename 文件名
+ * @returns 扩展名
  */
 export function getFileExtension(filename: string): string {
   return filename.split('.').pop()?.toLowerCase() || ''
@@ -291,6 +158,8 @@ export function getFileExtension(filename: string): string {
 
 /**
  * 生成唯一ID
+ *
+ * @returns 唯一ID字符串
  */
 export function generateId(): string {
   return Date.now().toString(36) + Math.random().toString(36).slice(2)
@@ -299,7 +168,8 @@ export function generateId(): string {
 /**
  * 创建文件预览URL
  *
- * @param file
+ * @param file 文件对象
+ * @returns 预览URL
  */
 export function createPreviewUrl(file: File | Blob): string {
   return URL.createObjectURL(file)
@@ -308,7 +178,7 @@ export function createPreviewUrl(file: File | Blob): string {
 /**
  * 释放预览URL
  *
- * @param url
+ * @param url 预览URL
  */
 export function revokePreviewUrl(url: string): void {
   URL.revokeObjectURL(url)
@@ -317,8 +187,8 @@ export function revokePreviewUrl(url: string): void {
 /**
  * 下载文件
  *
- * @param blob
- * @param filename
+ * @param blob 文件数据
+ * @param filename 文件名
  */
 export function downloadFile(blob: Blob, filename: string): void {
   const url = URL.createObjectURL(blob)
@@ -334,7 +204,7 @@ export function downloadFile(blob: Blob, filename: string): void {
 /**
  * 批量下载文件（打包为ZIP）
  *
- * @param files
+ * @param files 文件数组
  */
 export async function downloadMultipleFiles(
   files: Array<{ blob: Blob; filename: string }>,

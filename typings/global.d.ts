@@ -21,7 +21,6 @@ declare global {
     VITE_PUBLIC_PATH: string
     VITE_ROUTER_HISTORY: string
     VITE_COMPRESSION: ViteCompression
-    VITE_BASE_URL?: string
     [key: string]: any // 添加索引签名
   }
 }
