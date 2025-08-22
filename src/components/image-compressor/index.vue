@@ -14,7 +14,7 @@
             <el-col :span="8">
               <el-form-item label="输出格式">
                 <el-select v-model="compressionOptions.format" style="width: 100%">
-                  <el-option label="WebP" value="webp" />
+                  <el-option label="WebP(推荐)" value="webp" />
                   <el-option label="JPEG" value="jpeg" />
                   <el-option label="PNG" value="png" />
                 </el-select>
@@ -565,7 +565,7 @@ const downloadSingle = (imageFile: ImageFile) => {
 
   const originalExt = getFileExtension(imageFile.file.name)
   const baseName = imageFile.file.name.replace(`.${originalExt}`, '')
-  const filename = `${baseName}_compressed.${compressionOptions.format}`
+  const filename = `${baseName}.${compressionOptions.format}`
 
   downloadFile(imageFile.compressedBlob, filename)
 }
@@ -577,7 +577,7 @@ const downloadAll = async () => {
     .map(img => {
       const originalExt = getFileExtension(img.file.name)
       const baseName = img.file.name.replace(`.${originalExt}`, '')
-      const filename = `${baseName}_compressed.${compressionOptions.format}`
+      const filename = `${baseName}.${compressionOptions.format}`
 
       return {
         blob: img.compressedBlob!,
