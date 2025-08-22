@@ -50,6 +50,7 @@
     "@wlydfe/unocss-config": "^1.0.3",
     "boxen": "^8.0.1",
     "chokidar": "^4.0.3",
+    "concurrently": "^9.2.0",
     "editorconfig": "^3.0.1",
     "eslint": "^9.32.0",
     "form-data": "^4.0.4",

@@ -78,6 +78,9 @@ importers:
       chokidar:
         specifier: ^4.0.3
         version: 4.0.3
+      concurrently:
+        specifier: ^9.2.0
+        version: 9.2.0
       editorconfig:
         specifier: ^3.0.1
         version: 3.0.1
@@ -3233,7 +3236,8 @@ packages:
           targets:
             - cpu: x86
               os: win32
-    version: 0.0.0
+    version: 22.18.0
+    hasBin: true
 
   normalize-path@3.0.0:
     resolution: {integrity: sha512-6eZs5Ls3WtCisHWp9S2GUy8dqkpGi4BVSz3GaqiE6ezub0512ESztXUwUB6C6IKbQkY2Pnb/mD4WYojCRwcwLA==}

@@ -11,7 +11,7 @@ export default ({ mode }: ConfigEnv): UserConfigExport => {
     loadEnv(mode, root),
   )
   return {
-    base: VITE_PUBLIC_PATH,
+    base: VITE_PUBLIC_PATH || '/image-compressor/',
     root,
     resolve: {
       alias: { '@': path.resolve(__dirname, './src') },

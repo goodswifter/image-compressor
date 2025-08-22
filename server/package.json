@@ -16,8 +16,5 @@
   },
   "engines": {
     "node": ">=18"
-  },
-  "devDependencies": {
-    "concurrently": "^9.2.0"
   }
 }

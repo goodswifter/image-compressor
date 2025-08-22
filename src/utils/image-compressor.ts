@@ -7,7 +7,7 @@ import axios from 'axios'
 import JSZip from 'jszip'
 
 // API配置
-const API_BASE_URL = 'http://localhost:3001'
+const API_BASE_URL = import.meta.env.VITE_BASE_URL || 'http://localhost:3001'
 
 /**
  * 压缩图片（优先使用服务端Sharp，失败时降级到Canvas）
