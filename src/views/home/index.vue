@@ -103,7 +103,7 @@ defineOptions({ name: 'Home' })
 .features-section {
   max-width: 1200px;
   padding: 40px 20px;
-  margin: 60px auto 0;
+  margin: 20px auto;
   background: white;
   border-radius: 20px;
   box-shadow: 0 20px 60px rgb(0 0 0 / 10%);
