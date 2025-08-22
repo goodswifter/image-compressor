@@ -122,7 +122,7 @@ function calculateCompressionRatio(originalSize: number, compressedSize: number)
 
 /**
  * 格式化文件大小
- * 使用十进制单位（1000）与操作系统显示保持一致
+ * 使用十进制单位（1000）与操作系统显示保持一致，四舍五入保留整数
  *
  * @param bytes 字节数
  * @returns 格式化后的大小字符串
@@ -135,12 +135,14 @@ export function formatFileSize(bytes: number): string {
   const sizes = ['B', 'KB', 'MB', 'GB']
   const i = Math.floor(Math.log(bytes) / Math.log(k))
 
-  return `${Number.parseFloat((bytes / k ** i).toFixed(2))} ${sizes[i]}`
+  // 四舍五入保留整数
+  const value = Math.round(bytes / k ** i)
+  return `${value} ${sizes[i]}`
 }
 
 /**
  * 格式化文件大小（二进制单位）
- * 使用二进制单位（1024）用于技术精确显示
+ * 使用二进制单位（1024）用于技术精确显示，四舍五入保留整数
  *
  * @param bytes 字节数
  * @returns 格式化后的大小字符串
@@ -152,7 +154,9 @@ export function formatFileSizeBinary(bytes: number): string {
   const sizes = ['B', 'KiB', 'MiB', 'GiB']
   const i = Math.floor(Math.log(bytes) / Math.log(k))
 
-  return `${Number.parseFloat((bytes / k ** i).toFixed(2))} ${sizes[i]}`
+  // 四舍五入保留整数
+  const value = Math.round(bytes / k ** i)
+  return `${value} ${sizes[i]}`
 }
 
 /**
