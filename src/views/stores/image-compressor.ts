@@ -1,4 +1,4 @@
-import type { CompressionOptions, ImageFile } from '@/types/compressor'
+import type { CompressionOptions, ImageFile } from '@/views/types/compressor'
 import { ElMessage } from 'element-plus'
 import { computed, reactive, ref } from 'vue'
 import {

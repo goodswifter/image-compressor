@@ -16,7 +16,7 @@
 
 <script setup lang="ts">
 import { onUnmounted } from 'vue'
-import { useImageCompressorStore } from '@/stores/image-compressor'
+import { useImageCompressorStore } from '@/views/stores/image-compressor'
 import CompressionSettings from './cpns/CompressionSettings.vue'
 import ImageUpload from './cpns/ImageUpload.vue'
 import ResourceDisplay from './cpns/ResourceDisplay.vue'

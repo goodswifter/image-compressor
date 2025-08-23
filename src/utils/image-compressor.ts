@@ -2,7 +2,7 @@
  * 图片压缩工具函数 - 使用 browser-image-compression
  */
 
-import type { CompressionOptions, CompressionResult } from '@/types/compressor'
+import type { CompressionOptions, CompressionResult } from '@/views/types/compressor'
 import imageCompression from 'browser-image-compression'
 import JSZip from 'jszip'
 

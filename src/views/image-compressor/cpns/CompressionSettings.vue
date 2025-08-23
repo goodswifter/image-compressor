@@ -83,7 +83,7 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
 import Loading from '~icons/ep/loading'
-import { useImageCompressorStore } from '@/stores/image-compressor'
+import { useImageCompressorStore } from '@/views/stores/image-compressor'
 
 defineOptions({ name: 'CompressionSettings' })
 

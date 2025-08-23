@@ -12,8 +12,10 @@
       </p>
     </div>
 
+    <!-- 图片压缩器 -->
     <ImageCompressor />
 
+    <!-- 功能特色 -->
     <div class="features-section">
       <h2 class="features-title">功能特色</h2>
       <div class="features-grid">
@@ -59,7 +61,7 @@ import Download from '~icons/ep/download'
 import MagicStick from '~icons/ep/magic-stick'
 import Picture from '~icons/ep/picture'
 import Upload from '~icons/ep/upload'
-import ImageCompressor from '@/components/image-compressor/index.vue'
+import ImageCompressor from './image-compressor/index.vue'
 
 defineOptions({ name: 'Home' })
 </script>

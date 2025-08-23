@@ -240,7 +240,7 @@ import Clock from '~icons/ep/clock'
 import Delete from '~icons/ep/delete'
 import Right from '~icons/ep/right'
 import SuccessFilled from '~icons/ep/success-filled'
-import { useImageCompressorStore } from '@/stores/image-compressor'
+import { useImageCompressorStore } from '@/views/stores/image-compressor'
 
 defineOptions({ name: 'ResourceDisplay' })
 

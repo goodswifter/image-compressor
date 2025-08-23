@@ -40,7 +40,7 @@ import { storeToRefs } from 'pinia'
 import { ref } from 'vue'
 import Lightning from '~icons/ep/lightning'
 import UploadFilled from '~icons/ep/upload-filled'
-import { useImageCompressorStore } from '@/stores/image-compressor'
+import { useImageCompressorStore } from '@/views/stores/image-compressor'
 
 defineOptions({ name: 'ImageUpload' })
 
