@@ -11,7 +11,6 @@ import { ElementPlusResolver } from 'unplugin-vue-components/resolvers'
 import Components from 'unplugin-vue-components/vite'
 import removeConsole from 'vite-plugin-remove-console'
 import svgLoader from 'vite-svg-loader'
-import { viteGenAssets } from '../scripts/vite-plugin-gen-assets'
 import { configCompressPlugin } from './compress'
 import { viteBuildInfo } from './info'
 
@@ -22,8 +21,6 @@ export const getPluginsList = (VITE_COMPRESSION: ViteCompression = 'gzip'): Plug
     // jsx、tsx语法支持
     vueJsx(),
     viteBuildInfo(),
-    // 生成图片资源常量
-    viteGenAssets(),
     // svg组件化支持
     svgLoader(),
     configCompressPlugin(VITE_COMPRESSION),
